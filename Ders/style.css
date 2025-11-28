@@ -1,0 +1,263 @@
+/* ======================================================= */
+/* 1. GENEL AYARLAR VE RENK DEĞİŞKENLERİ */
+/* ======================================================= */
+
+:root {
+    /* AÇIK TEMA (Varsayılan) */
+    --bg-body: #f0f2f5;
+    --bg-card: #ffffff;
+    --text-main: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --sidebar-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-text: #495057;
+    --hover-bg: #f8f9fa;
+    --primary-color: #0d6efd;
+    --shadow: rgba(0,0,0,0.1);
+    --story-bg-fallback: #e9ecef; /* Resim yoksa görünecek renk */
+}
+
+/* KOYU TEMA (Dark Mode) */
+body.dark-mode {
+    --bg-body: #18191a;
+    --bg-card: #242526;
+    --text-main: #e4e6eb;
+    --text-muted: #b0b3b8;
+    --border-color: #393a3b;
+    --sidebar-bg: #242526;
+    --input-bg: #3a3b3c;
+    --input-text: #e4e6eb;
+    --hover-bg: #3a3b3c;
+    --primary-color: #4599ff;
+    --shadow: rgba(0,0,0,0.3);
+    --story-bg-fallback: #3a3b3c;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ======================================================= */
+/* 2. SIDEBAR VE LAYOUT */
+/* ======================================================= */
+
+#social-app-wrapper { display: flex; width: 100%; transition: margin-left 0.3s ease; }
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    min-width: 250px;
+    background-color: var(--sidebar-bg);
+    height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px var(--shadow);
+    z-index: 1050;
+    transition: transform 0.3s ease, background-color 0.3s;
+    border-right: 1px solid var(--border-color);
+}
+
+/* İçerik Alanı */
+.main-content-wrapper {
+    flex-grow: 1;
+    padding-left: 250px;
+    padding-right: 300px;
+    min-height: 100vh;
+    width: 100%;
+    transition: padding 0.3s ease;
+}
+
+/* Sağ Sidebar */
+.right-sidebar {
+    width: 300px;
+    min-width: 300px;
+    background-color: var(--sidebar-bg);
+    height: 100vh;
+    position: fixed;
+    top: 0; right: 0;
+    padding: 20px;
+    border-left: 1px solid var(--border-color);
+    overflow-y: auto;
+    z-index: 1000;
+    transition: background-color 0.3s;
+}
+
+/* Linkler ve Metinler */
+.nav-link { color: var(--text-main) !important; padding: 10px 15px; margin-bottom: 5px; transition: all 0.2s; }
+.nav-link:hover { background-color: var(--hover-bg); border-radius: 5px; }
+.nav-link.active { font-weight: bold; color: var(--primary-color) !important; background-color: var(--hover-bg); border-radius: 5px; }
+.nav-link i { margin-right: 10px; }
+
+/* Mobil Uyumluluk */
+.sidebar-toggled .sidebar { transform: translateX(-100%); }
+.sidebar-toggled .main-content-wrapper { padding-left: 0; }
+
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .right-sidebar { display: none; }
+    .main-content-wrapper { padding-left: 0; padding-right: 0; }
+    .sidebar-toggled .sidebar { transform: translateX(0); }
+}
+
+/* ======================================================= */
+/* 3. KARTLAR, INPUTLAR VE GENEL BİLEŞENLER */
+/* ======================================================= */
+
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px var(--shadow);
+    transition: background-color 0.3s;
+}
+
+.card-header, .card-footer {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.form-control {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--input-text);
+}
+
+.form-control:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.list-group-item {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+
+.list-group-item:hover { background-color: var(--hover-bg); }
+
+/* Metin Renkleri */
+.text-muted { color: var(--text-muted) !important; }
+.text-dark { color: var(--text-main) !important; }
+h1, h2, h3, h4, h5, h6, p, span, b, strong { color: var(--text-main); }
+
+/* ======================================================= */
+/* 4. ÖZEL BİLEŞENLER (Story, Profil vb.) */
+/* ======================================================= */
+
+.user-info-card {
+    background-color: var(--hover-bg);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+/* STORY CARD DÜZELTME */
+.story-card {
+    width: 110px; min-width: 110px; height: 180px;
+    border-radius: 10px; overflow: hidden; position: relative;
+    cursor: pointer; box-shadow: 0 1px 4px var(--shadow);
+    transition: transform 0.2s;
+    background-size: cover; background-position: center;
+    background-color: var(--story-bg-fallback); /* Resim yoksa gri görünür */
+    border: 1px solid var(--border-color);
+}
+.story-card:hover { transform: scale(1.03); }
+
+.story-creator-card {
+    background-color: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+}
+
+.story-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+    background-color: #fff; /* Avatar resmi yoksa beyaz olsun */
+}
+
+.story-user-name {
+    position: absolute; bottom: 5px; left: 5px; right: 5px;
+    color: #fff !important; font-size: 0.75rem; font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Profil Sayfası Tabları */
+.nav-tabs { border-bottom: none; border-top: 1px solid var(--border-color); justify-content: center; }
+.nav-tabs .nav-link { background: transparent; border: none; color: var(--text-muted); font-weight: 600; margin-right: 20px; }
+.nav-tabs .nav-link.active { color: var(--text-main); border-top: 1px solid var(--text-main); margin-top: -1px; }
+
+/* ======================================================= */
+/* 5. MESAJLAŞMA EKRANI (Dark Mode Uyumlu) */
+/* ======================================================= */
+
+.chat-area {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.chat-header {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 10px 10px 0 0;
+}
+
+.chat-messages {
+    background-color: var(--bg-body);
+}
+
+.message-received {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.message-sent {
+    background-color: var(--primary-color);
+    color: #fff !important;
+}
+
+.chat-input-area {
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+    border-radius: 0 0 10px 10px;
+}
+
+.chat-list-item:hover { background-color: var(--hover-bg); }
+.chat-list-item.active { background-color: var(--hover-bg); border-left: 4px solid var(--primary-color); }
+
+/* ======================================================= */
+/* 6. BOOTSTRAP MODAL (Dark Mode Fix) */
+/* ======================================================= */
+
+body.dark-mode .modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+body.dark-mode .modal-header, 
+body.dark-mode .modal-footer {
+    border-color: var(--border-color);
+}
+
+body.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}

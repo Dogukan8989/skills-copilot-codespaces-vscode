@@ -1,0 +1,63 @@
+<div id="achievements-page" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🏅 Başarılar Yönetimi</h2>
+    </div>
+    <div class="alert alert-info">
+        Kullanıcıların otomatik kazandığı başarıları buradan takip edebilirsiniz. Yönetici olarak manuel (torpil) başarı ataması yapabilirsiniz.
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Kullanıcı</th>
+                        <th>Rol</th>
+                        <th>Kazanılan Başarılar</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="achievementsTableBody">
+                    <tr><td colspan="5" class="text-center text-muted">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="giveAchievementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog"> 
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="achievementModalTitle">Başarı Yönetimi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="giveAchievementForm" onsubmit="handleGiveAchievementSubmit(event)">
+                    <input type="hidden" id="achievementTargetUserId">
+
+                    <p class="text-danger small fw-bold" id="achievementCurrentLevel">Mevcut Seviye: 0</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Başarı Türü</label>
+                        <select class="form-select" id="achievementSelect" required>
+                            </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Atanacak Seviye</label>
+                        <select class="form-select" id="achievementLevelSelect" required>
+                            </select>
+                    </div>
+
+                    <div class="alert alert-warning small mt-3">
+                        UYARI: Manuel atama yaparsanız, bu başarı otomatik hesaplamayı geçersiz kılabilir.
+                    </div>
+                    
+                    <button type="submit" class="btn btn-info text-white w-100"><i class="fas fa-magic me-1"></i> Başarıyı Ata</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

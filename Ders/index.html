@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sosyal Medya Admin Kontrol Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        /* BEYAZ EKRAN SORUNUNU ÇÖZEN TEMEL LAYOUT CSS */
+        body {
+            display: flex; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-color: #f4f6f9;
+            margin: 0;
+        }
+        
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            min-height: 100vh;
+            background-color: #212529; 
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+
+        #content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        
+        #sidebar .nav-link {
+            color: #adb5bd;
+            padding: 10px 15px;
+            display: flex; 
+            align-items: center;
+            border-radius: 5px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            background-color: #343a40;
+            color: white;
+        }
+        #sidebar .nav-link i {
+            width: 20px; 
+            text-align: center;
+        }
+        
+        .user-info-card {
+            background-color: #343a40;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .user-info-card img {
+            border: 2px solid #0d6efd;
+        }
+
+        .table-hover > tbody > tr > td:hover {
+            cursor: default; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="p-3 d-flex flex-column h-100">
+            <h4 class="text-center text-primary border-bottom pb-3 mb-4">SOCIALBOOK ADMIN</h4>
+            
+            <div class="user-info-card mx-3 mb-4 text-center">
+                <img src="https://via.placeholder.com/60/FFD700/FFFFFF?text=S" id="sidebarUserAvatar" class="rounded-circle mb-2" style="width: 60px; height: 60px; object-fit: cover;">
+                <p class="mb-0 fw-bold text-white" id="mainUserName"></p>
+                <span class="badge bg-primary" id="userRoleBadge"></span>
+                <button class="btn btn-sm btn-outline-light mt-2 w-100" id="siteLogoutBtn" onclick="logout()"><i class="fas fa-sign-out-alt me-1"></i> Çıkış</button>
+            </div>
+            
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" data-page="dashboard-page"><i class="fas fa-tachometer-alt me-2"></i> Genel Bakış</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="users-page"><i class="fas fa-users me-2"></i> Kullanıcılar <span id="users-badge" class="badge bg-danger ms-auto"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="posts-page"><i class="fas fa-images me-2"></i> Gönderiler <span id="posts-badge" class="badge bg-danger ms-auto"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="moderation-page"><i class="fas fa-shield-alt me-2"></i> Moderasyon</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="achievements-page"><i class="fas fa-medal me-2"></i> Başarılar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="team-chat-page"><i class="fas fa-comments me-2"></i> Ekip Sohbeti <span id="team-chat-badge" class="badge bg-danger ms-auto"></span></a>
+                </li>
+                 <li class="nav-item">
+                    <a class="nav-link" data-page="blacklist-page"><i class="fas fa-ban me-2"></i> Kara Liste</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="logs-page"><i class="fas fa-history me-2"></i> Loglar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="settings-page"><i class="fas fa-cog me-2"></i> Ayarlar</a>
+                </li>
+            </ul>
+
+            <div class="mt-4 pt-3 border-top border-secondary">
+                <a 
+                    href="social_media_main.html" 
+                    target="_blank" 
+                    class="btn btn-warning w-100 fw-bold"
+                    onclick="window.open('social_media_main.html', '_blank'); return false;" 
+                >
+                    <i class="fas fa-external-link-alt me-2"></i> Siteye Git
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="content">
+        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <h1 class="h3 mb-0 text-dark" id="currentPageTitle">Genel Bakış</h1>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-secondary me-2" onclick="refreshAllData(); renderUserTable(); updateDashboardMetrics(); alert('Veriler Yenilendi!');"><i class="fas fa-sync-alt"></i></button>
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="total-notifications-badge">0</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="notification-menu">
+                        <li class="dropdown-item text-muted">Bildirim yok</li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div id="pages-container">
+            
+            <main id="dashboard-page" style="display: block;"> 
+                <div class="row">
+                    <div class="col-md-3 mb-4"><div class="card p-3 text-center bg-primary text-white"><i class="fas fa-users fa-2x mb-2"></i><h5 class="mb-0" id="totalUsers">0</h5><p class="mb-0 small">Toplam Kullanıcı</p></div></div>
+                    <div class="col-md-3 mb-4"><div class="card p-3 text-center bg-success text-white"><i class="fas fa-images fa-2x mb-2"></i><h5 class="mb-0" id="totalPosts">0</h5><p class="mb-0 small">Toplam Gönderi</p></div></div>
+                    <div class="col-md-3 mb-4"><div class="card p-3 text-center bg-warning text-dark"><i class="fas fa-user-plus fa-2x mb-2"></i><h5 class="mb-0" id="pendingUsers">0</h5><p class="mb-0 small">Onay Bekleyen Kullanıcı</p></div></div>
+                    <div class="col-md-3 mb-4"><div class="card p-3 text-center bg-info text-white"><i class="fas fa-clock fa-2x mb-2"></i><h5 class="mb-0" id="pendingComplaints">0</h5><p class="mb-0 small">Çözülmemiş Şikayet</p></div></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-danger text-white fw-bold">🚨 En Çok Rapor Edilenler (Çözülmemiş)</div>
+                            <div class="card-body p-0">
+                                <div class="row g-0">
+                                    <div class="col-md-6 border-end">
+                                        <h6 class="p-3 mb-0 border-bottom small fw-bold">Kullanıcılar</h6>
+                                        <ul id="topComplainedUsers" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;">
+                                            <li class="list-group-item text-muted small">Yükleniyor...</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="p-3 mb-0 border-bottom small fw-bold">Gönderiler</h6>
+                                        <ul id="topComplainedPosts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;">
+                                            <li class="list-group-item text-muted small">Yükleniyor...</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark text-white fw-bold">Son Moderasyon Logları</div>
+                            <div class="card-body" style="height: 300px; overflow-y: scroll;">
+                                <ul id="recentLogsList" class="list-group list-group-flush">
+                                    <li class="list-group-item text-muted">Loglar yükleniyor...</li>
+                                </ul
+                            <div class="card-footer text-end"><a href="#" onclick="navigateTo('logs-page')">Tüm Logları Gör</a></div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 offset-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark text-white fw-bold">En Aktif Kullanıcılar (Son 7 Gün)</div>
+                            <div class="card-body" style="height: 300px; overflow-y: scroll;">
+                                <ul id="activeUsersList" class="list-group list-group-flush">
+                                    <li class="list-group-item text-muted">Veriler yükleniyor...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <main id="users-page" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>👥 Kullanıcı Yönetimi</h2>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-success me-3" onclick="prepareUserModal('create')"><i class="fas fa-user-plus me-1"></i> Yeni Kullanıcı Ekle</button>
+                        <input type="text" class="form-control w-100" id="userSearch" placeholder="Kullanıcı ara...">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header bg-primary text-white fw-bold">Kullanıcı Listesi</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>İsim</th>
+                                    <th>E-posta</th>
+                                    <th>Rol</th>
+                                    <th>Durum</th>
+                                    <th>Son Giriş Konum / IP</th>
+                                    <th>İşlemler</th>
+                                    <th>Online</th>
+                                </tr>
+                            </thead >
+                            <tbody id="userTableBody">
+                                <tr><td colspan="8" class="text-center text-muted">Yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <main id="posts-page" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>🖼️ Gönderi Yönetimi</h2>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="renderPostTable(posts)"><i class="fas fa-list me-1"></i> Tümü</button>
+                        <button type="button" class="btn btn-outline-warning" onclick="renderPostTable(posts.filter(p => p.status === 'pending'))"><i class="fas fa-clock me-1"></i> Onay Bekleyenler</button>
+                        <button type="button" class="btn btn-outline-success" onclick="renderPostTable(posts.filter(p => p.status === 'active'))"><i class="fas fa-check-circle me-1"></i> Aktifler</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kullanıcı</th>
+                                    <th>İçerik Önizleme</th>
+                                    <th>Beğeni/Yorum</th>
+                                    <th>Durum</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postTableBody">
+                                <tr><td colspan="6" class="text-center text-muted">Gönderiler yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <main id="moderation-page" style="display: none;">
+                <h2>🚨 Şikayet ve Rapor Yönetimi</h2>
+                <div class="alert alert-info">
+                    Kullanıcılar tarafından yapılan tüm şikayetleri buradan takip edebilirsiniz.
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="mb-0 text-muted" id="reportCountSummary">Toplam 0 şikayet.</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-success" onclick="renderReportsTable(reports.filter(r => r.isResolved))"><i class="fas fa-check-circle"></i> Çözülenler</button>
+                        <button class="btn btn-sm btn-danger" onclick="renderReportsTable(reports.filter(r => !r.isResolved))"><i class="fas fa-times-circle"></i> Çözülmeyenler</button>
+                        <button class="btn btn-sm btn-primary" onclick="renderReportsTable()"><i class="fas fa-list-alt"></i> Tüm Şikayetler</button>
+                    </div>
+                </div>
+                
+                <div id="reportsTableBodyContainer">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Rapor ID</th>
+                                        <th>Tür</th>
+                                        <th>Hedef</th>
+                                        <th>Raporlayan</th>
+                                        <th>Sebep</th>
+                                        <th>İçerik</th>
+                                        <th>Durum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsTableBody">
+                                    <tr><td colspan="8" class="text-center text-muted">Şikayetler yükleniyor...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main id="achievements-page" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>🏅 Başarılar Yönetimi</h2>
+                </div>
+                <div class="alert alert-info">
+                    Kullanıcıların otomatik kazandığı başarıları buradan takip edebilirsiniz. Yönetici olarak manuel (torpil) başarı ataması yapabilirsiniz.
+                </div>
+
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kullanıcı</th>
+                                    <th>Rol</th>
+                                    <th>Kazanılan Başarılar</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead >
+                            <tbody id="achievementsTableBody">
+                                <tr><td colspan="5" class="text-center text-muted">Yükleniyor...</td></tr>
+                            </tbody >
+                        </table>
+                    </div>
+                </div>
+            </main>
+            
+            <main id="team-chat-page" style="display: none;">
+                <h2>💬 Ekip Sohbeti</h2>
+                <div class="card mt-3">
+                    <div class="card-body p-0 d-flex flex-column" style="height: 70vh;">
+                        <div id="chatMessagesContainer" class="flex-grow-1 p-3 overflow-auto">
+                            </div>
+                        <div class="p-3 border-top bg-light">
+                            <form id="chatForm" class="d-flex gap-2">
+                                <input type="text" id="chatInput" class="form-control" placeholder="Bir mesaj yazın... (/clear ile temizle)" autocomplete="off" required>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gönder</button>
+                            </form>
+                            <p class="small text-muted mt-1 mb-0">`moderatör` ve altı roller sadece chat'i kullanabilir. `admin` ve `super_admin` `/clear` komutu ile sohbeti temizleyebilir.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main id="blacklist-page" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>🚫 Kara Liste Kelime Yönetimi</h2>
+                </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Bu kelimeler kullanıcı gönderi ve mesajlarında otomatik olarak sansürlenir. (Süper Admin / Admin / Moderatör erişimi gereklidir).
+                </div>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white fw-bold">Yeni Kelime Ekle</div>
+                            <div class="card-body">
+                                <form id="addBlacklistWordForm">
+                                    <div class="mb-3">
+                                        <label for="newWordInput" class="form-label">Kelime (Küçük Harf)</label>
+                                        <input type="text" class="form-control" id="newWordInput" placeholder="örnek: kötü kelime" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="fas fa-plus me-1"></i> Kara Listeye Ekle
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-list me-1"></i> Sansürlenen Kelimeler (<span id="wordCount">0</span>)</span>
+                                <button class="btn btn-sm btn-outline-light" onclick="saveBlacklistedWords(); alert('Kelime listesi manuel olarak kaydedildi!');"><i class="fas fa-save me-1"></i> Kaydet</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush" id="blacklistedWordsList">
+                                    <li class="list-group-item text-center text-muted">Kelime bulunamadı.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main id="logs-page" style="display: none;">
+                <h2>📄 Moderasyon Kayıtları</h2>
+                <div class="alert alert-info">
+                    Yapılan tüm yönetici ve moderasyon işlemlerini buradan takip edebilirsiniz.
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Son İşlemler</span>
+                        <button class="btn btn-sm btn-danger" onclick="clearModerationLogs()"><i class="fas fa-trash me-1"></i> Kayıtları Temizle</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush" id="moderationLogsList" style="max-height: 500px; overflow-y: auto;">
+                            <li class="list-group-item text-muted">Kayıt bulunamadı.</li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+            
+            <main id="settings-page" style="display: none;">
+                <h2>⚙️ Admin Panel Ayarları</h2>
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white fw-bold">Hesap Bilgilerini Yönet</div>
+                            <div class="card-body">
+                                
+                                <h5 class="text-danger mb-3"><i class="fas fa-lock me-1"></i> Şifreyi Değiştir</h5>
+                                <form id="changePasswordForm" onsubmit="changePassword(event)">
+                                    <div class="mb-3">
+                                        <label for="oldPassword" class="form-label">Mevcut Şifre</label>
+                                        <input type="password" class="form-control" id="oldPassword" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="newPassword" class="form-label">Yeni Şifre</label>
+                                        <input type="password" class="form-control" id="newPassword" required minlength="6">
+                                    </div>
+                                    <div id="passwordChangeMessage"></div>
+                                    <button type="submit" class="btn btn-danger w-100 mt-2">Şifreyi Güncelle</button>
+                                </form>
+
+                                <hr class="my-4">
+                                
+                                <h5 class="text-success mb-3"><i class="fas fa-user-edit me-1"></i> Kullanıcı Adını Değiştir</h5>
+                                <form id="changeUsernameForm" onsubmit="changeUsername(event)">
+                                    <div class="mb-3">
+                                        <label for="newUserNameInput" class="form-label">Yeni Kullanıcı Adı (Tüm Veriler Güncellenir!)</label>
+                                        <input type="text" class="form-control" id="newUserNameInput" required>
+                                    </div>
+                                    <div id="nameChangeMessage"></div>
+                                    <button type="submit" class="btn btn-success w-100 mt-2">Kullanıcı Adını Değiştir</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white fw-bold">Genel Sistem Ayarları</div>
+                                    <div class="card-body">
+                                        <p class="text-muted small">Bu kısım şu an için statiktir.</p>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="maintenanceMode" style="width: 3em; height: 1.5em;">
+                                            <label class="form-check-label" for="maintenanceMode">Bakım Modu (Gelişmiş)</label>
+                                        </div>
+                                        
+                                        <button class="btn btn-danger w-100 mt-3" data-bs-toggle="modal" data-bs-target="#globalWarningModal">
+                                            <i class="fas fa-bullhorn me-1"></i> Global Uyarı Gönder
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                 <div class="card">
+                                    <div class="card-header bg-warning text-dark fw-bold">Veri Yönetimi</div>
+                                    <div class="card-body">
+                                        <p class="text-muted small">Local Storage'daki tüm verileri sıfırlar (Kullanıcılar, Gönderiler vb.)</p>
+                                        <button class="btn btn-outline-danger w-100" onclick="if(confirm('TÜM VERİLERİ SIFIRLAMAK ÜZERESİNİZ. Emin misiniz? Bu işlem geri alınamaz!')){localStorage.clear(); sessionStorage.clear(); window.location.reload();}">
+                                            <i class="fas fa-skull-crossbones me-1"></i> Tüm Verileri Sıfırla
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+        </div> 
+    </div> 
+
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg"> 
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Kullanıcı İşlemleri</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="internalUserId"> 
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <h6 class="text-primary">Kullanıcı Bilgileri</h6>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">ID (Zorunlu / Benzersiz)</label>
+                                    <input type="number" class="form-control" id="userId" placeholder="Örn: 15" required>
+                                    <div id="idError" class="form-text text-danger small"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Kullanıcı Adı (Benzersiz)</label>
+                                    <input type="text" class="form-control" id="userName" required>
+                                    <div id="usernameError" class="form-text text-danger small"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Ad Soyad</label>
+                                    <input type="text" class="form-control" id="userFullName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">E-posta (Görüntüleme)</label>
+                                    <input type="email" class="form-control" id="userEmail" readonly> 
+                                </div>
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <label class="form-label mb-0">Şifre Değiştir</label>
+                                    <button type="button" class="btn btn-sm btn-warning" id="resetPasswordButton" style="display: none;"><i class="fas fa-redo me-1"></i> Şifreyi Sıfırla</button>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="password" class="form-control" id="userPassword" placeholder="Değiştirmek istemiyorsanız boş bırakın">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Rol</label>
+                                    <select class="form-select" id="userRole"></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Durum</label>
+                                    <select class="form-select" id="userStatus">
+                                        <option value="active">Onaylandı (Giriş İzni)</option>
+                                        <option value="inactive">Kalıcı Ban</option>
+                                        <option value="pending">Onay Bekliyor</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                            <h6 class="text-primary">Rozetler & Tikler</h6>
+                            <div class="card p-3 mb-3 bg-light border-0">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="badgeBlack">
+                                    <label class="form-check-label fw-bold" for="badgeBlack">
+                                        <i class="fas fa-shield-alt text-dark me-1"></i> Siyah Tik (Yetkili/MOD)
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="badgeBlue">
+                                    <label class="form-check-label fw-bold" for="badgeBlue">
+                                        <i class="fas fa-check-circle text-primary me-1"></i> Mavi Tik (Onaylı Hesap)
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="badgeRed">
+                                    <label class="form-check-label fw-bold" for="badgeRed">
+                                        <i class="fas fa-fire text-danger me-1"></i> Kırmızı Tik (Yüksek Aktivite)
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="badgeTech">
+                                    <label class="form-check-label fw-bold" for="badgeTech">
+                                        <i class="fas fa-code text-success me-1"></i> Teknisyen (Yazılımcı) Tiki
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="badgeVIP">
+                                    <label class="form-check-label fw-bold" for="badgeVIP">
+                                        <i class="fas fa-star text-warning me-1"></i> VIP Tiki
+                                    </label>
+                                </div>
+                                </div>
+                            
+                            <h6 class="text-primary"><i class="fas fa-paper-plane me-1"></i> Son Gönderiler</h6>
+                            <div id="lastUserPostsContainer" class="mb-3">
+                                </div>
+
+                            <h6 class="text-primary"><i class="fas fa-history me-1"></i> 7 Günlük Aktivite Logu</h6>
+                                <div class="table-responsive" style="font-size: 0.85rem;">
+                                    <table class="table table-sm table-bordered text-center">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Gün</th>
+                                                <th>Süre</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="activityLogTableBody">
+                                            </tbody>
+                                    </table>
+                                    <small class="text-muted">* Veriler her Pazartesi sıfırlanır.</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="userModerationLogsSection" class="mt-4">
+                            <h6 class="text-danger"><i class="fas fa-gavel me-1"></i> Kullanıcı Moderasyon Geçmişi</h6>
+                            <div class="card shadow-sm">
+                                <ul class="list-group list-group-flush" id="userModerationLogsContainer">
+                                    </ul>
+                            </div>
+                        </div>
+                        <hr>
+                        <button type="submit" class="btn btn-primary w-100">Değişiklikleri Kaydet</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="postDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postDetailModalTitle">Gönderi Detayları</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul class="list-group list-group-flush" id="postDetailListContent">
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"> 
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="postModalLabel">Gönderi Yönetimi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="postForm" onsubmit="handlePostSubmit(event)">
+                        <input type="hidden" id="postId">
+                        <div class="mb-3">
+                            <label for="postUser" class="form-label fw-bold">Kullanıcı Adı (Yazar)</label>
+                            <input type="text" class="form-control" id="postUser" required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="postContent" class="form-label fw-bold">Gönderi İçeriği</label>
+                            <textarea class="form-control" id="postContent" rows="5" required></textarea>
+                        </div>
+                        <div class="alert alert-info small">
+                            Düzenleme yaparken, gönderinin durumu (Onay/Red) korunur. Durum değiştirmek için gönderi tablosunu kullanın.
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Değişiklikleri Kaydet</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="giveAchievementModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"> 
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="achievementModalTitle">Başarı Yönetimi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="giveAchievementForm" onsubmit="handleGiveAchievementSubmit(event)">
+                        <input type="hidden" id="achievementTargetUserId">
+
+                        <p class="text-danger small fw-bold" id="achievementCurrentLevel">Mevcut Seviye: 0</p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Başarı Türü</label>
+                            <select class="form-select" id="achievementSelect" required>
+                                </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Atanacak Seviye</label>
+                            <select class="form-select" id="achievementLevelSelect" required>
+                                </select>
+                        </div>
+
+                        <div class="alert alert-warning small mt-3">
+                            UYARI: Manuel atama yaparsanız, bu başarı otomatik hesaplamayı geçersiz kılabilir.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-info text-white w-100"><i class="fas fa-magic me-1"></i> Başarıyı Ata</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="warningModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"> 
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="warningModalTitle">Kullanıcıya Özel Uyarı</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="sendUserWarning(event)">
+                        <input type="hidden" id="warningTargetUserId">
+                        <p class="mb-3">Uyarı Gönderilen: <strong id="warningTargetUserName"></strong></p>
+                        
+                        <div class="mb-3">
+                            <label for="warningReasonSelect" class="form-label fw-bold">Hazır Sebep Seç (Opsiyonel)</label>
+                            <select class="form-select" id="warningReasonSelect"></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="warningMessageInput" class="form-label fw-bold">Uyarı Mesajı (Gerekliyse Detay)</label>
+                            <textarea class="form-control" id="warningMessageInput" rows="3" placeholder="Örn: 'İçeriklerinizi kontrol edin, kurallara uymuyor.' (Seçili sebebi geçersiz kılar)"></textarea>
+                        </div>
+                        
+                        <div class="alert alert-danger small mt-3">
+                            UYARI: Bu mesaj, kullanıcının sosyal medya akışına bildirim olarak düşecektir.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning text-dark w-100"><i class="fas fa-paper-plane me-1"></i> Uyarıyı Gönder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="globalWarningModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"> 
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">📢 TÜM KULLANICILARA SİSTEM UYARISI</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="window.sendGlobalWarningSubmit(event)">
+                        <div class="mb-3">
+                            <label for="globalWarningMessageInput" class="form-label fw-bold">Uyarı Mesajı (Tüm Akışlarda Görünecektir)</label>
+                            <textarea class="form-control" id="globalWarningMessageInput" rows="4" placeholder="Örn: 'Sistem bakımı başlıyor, lütfen 5 dakika içinde çıkış yapın!'" required></textarea>
+                        </div>
+
+                        <div class="alert alert-danger small mt-3">
+                            KRİTİK UYARI: Bu işlem TÜM aktif kullanıcılara anında bildirim olarak gider ve DING sesi çalar.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-danger w-100"><i class="fas fa-bullhorn me-1"></i> GLOBAL UYARIYI YAYINLA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="data_store.js"></script> 
+    <script src="kullanici.js"></script> 
+    <script src="achievements_data.js"></script> 
+    <script src="user_achievements.js"></script> 
+    <script src="social-media.js"></script> 
+    <script src="admin_blacklist.js"></script> 
+    <script src="admin.js"></script>
+    <script>
+        // BAKIM MODU SWITCH MANTIĞI
+        document.addEventListener('DOMContentLoaded', () => {
+            const maintenanceSwitch = document.getElementById('maintenanceMode');
+            if (maintenanceSwitch) {
+                // LocalStorage'dan durumu yükle
+                maintenanceSwitch.checked = localStorage.getItem('MAINTENANCE_MODE') === 'enabled';
+
+                // Değişikliği kaydet
+                maintenanceSwitch.addEventListener('change', () => {
+                    if (maintenanceSwitch.checked) {
+                        localStorage.setItem('MAINTENANCE_MODE', 'enabled');
+                        alert('Bakım Modu AKTİF EDİLDİ. Normal kullanıcılar artık giriş yapamayacak.');
+                    } else {
+                        localStorage.setItem('MAINTENANCE_MODE', 'disabled');
+                        alert('Bakım Modu KAPATILDI.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

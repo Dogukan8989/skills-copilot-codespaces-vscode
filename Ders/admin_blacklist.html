@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kara Liste Yönetimi | Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="style.css" rel="stylesheet">
+    
+    </head>
+<body>
+
+    <main id="blacklist-page" style="display: block; padding: 20px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🚫 Kara Liste Kelime Yönetimi</h2>
+        </div>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i> Bu kelimeler kullanıcı gönderi ve mesajlarında otomatik olarak sansürlenir. (Süper Admin / Admin / Moderatör erişimi gereklidir).
+        </div>
+
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white fw-bold">Yeni Kelime Ekle</div>
+                    <div class="card-body">
+                        <form id="addBlacklistWordForm">
+                            <div class="mb-3">
+                                <label for="newWordInput" class="form-label">Kelime (Küçük Harf)</label>
+                                <input type="text" class="form-control" id="newWordInput" placeholder="örnek: kötü kelime" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="fas fa-plus me-1"></i> Kara Listeye Ekle
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-list me-1"></i> Sansürlenen Kelimeler (<span id="wordCount">0</span>)</span>
+                        <button class="btn btn-sm btn-outline-light" onclick="saveBlacklistedWords(); alert('Kelime listesi kaydedildi!');"><i class="fas fa-save me-1"></i> Kaydet</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush" id="blacklistedWordsList">
+                            <li class="list-group-item text-center text-muted">Kelime yükleniyor...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="data_store.js"></script>
+    <script src="admin_blacklist.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
